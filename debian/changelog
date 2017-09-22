@@ -1,0 +1,14 @@
+ros-kinetic-sick-s3x (0.0.2-0xenial) xenial; urgency=high
+
+
+
+ -- Henrik Andreasson <henrik.andreasson@oru.se>  Thu, 21 Sep 2017 23:00:00 -0000
+
+ros-kinetic-sick-s3x (0.0.1-0xenial) xenial; urgency=high
+
+  * Initial version.
+  * Contributors: Henrik Andreasson
+
+ -- Henrik Andreasson <henrik.andreasson@oru.se>  Thu, 21 Sep 2017 23:00:00 -0000
+
+
