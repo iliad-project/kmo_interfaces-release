@@ -2,6 +2,11 @@
 Changelog for package kmo_navserver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.3 (2017-09-22)
+------------------
+* added visualization depenency
+* Contributors: Marc Hanheide
+
 0.0.2 (2017-09-22)
 ------------------
 * added nav_msgs

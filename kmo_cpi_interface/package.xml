@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>kmo_cpi_interface</name>
-  <version>0.0.2</version>
+  <version>0.0.3</version>
   <description>The kmo_cpi_interface package, will use the CPI socket to communicate with the VMC500/CVC600 unit.</description>
 
   <maintainer email="henrik.andreasson@oru.se">Henrik Andreasson</maintainer>
