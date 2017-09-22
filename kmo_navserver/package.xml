@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>kmo_navserver</name>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
   <description>
     A ROS driver for the VMC500/CVC600 unit.
   </description>
@@ -23,6 +23,7 @@
   <build_depend>tf_conversions</build_depend>
   <build_depend>eigen</build_depend>
   <build_depend>boost</build_depend>
+  <build_depend>nav_msgs</build_depend>
   
   <run_depend>std_msgs</run_depend>
   <run_depend>roscpp</run_depend>
@@ -32,6 +33,7 @@
   <run_depend>tf_conversions</run_depend>
   <run_depend>eigen</run_depend>
   <run_depend>boost</run_depend>
+  <run_depend>nav_msgs</run_depend>
   
   <export>
     <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lkmo_navserver"/>
