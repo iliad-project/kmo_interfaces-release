@@ -1,0 +1,8 @@
+ros-kinetic-kmo-cpi-interface (0.0.1-1xenial) xenial; urgency=high
+
+  * Initial version.
+  * Contributors: Henrik Andreasson
+
+ -- Henrik Andreasson <henrik.andreasson@oru.se>  Fri, 22 Sep 2017 00:00:00 -0000
+
+
