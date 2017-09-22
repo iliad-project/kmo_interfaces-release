@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <name>kmo_cpi_interface</name>
+  <version>0.0.1</version>
+  <description>The kmo_cpi_interface package, will use the CPI socket to communicate with the VMC500/CVC600 unit.</description>
+
+  <maintainer email="henrik.andreasson@oru.se">Henrik Andreasson</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>boost</build_depend>
+  
+  <run_depend>roscpp</run_depend>
+  <run_depend>boost</run_depend>
+
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lkmo_cpi_interface"/>
+  </export>
+</package>
