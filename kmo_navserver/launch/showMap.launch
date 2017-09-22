@@ -1,0 +1,9 @@
+<launch>
+
+	<arg name="file_name" default="TOP_RED_E1_E2_E3.bag"/>
+	<arg name="rvizconfig" default="$(find kmo_navserver)/config/showMap.rviz" />
+
+	<node name ="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />	
+	<node name="rosbag" pkg="rosbag" type="play" args="--loop $(find kmo_navserver)/data/$(arg file_name) --delay=5" output="screen"/>
+
+</launch>
