@@ -1,6 +1,0 @@
-<launch>
-    <node pkg="kmo_fork_control" type="fork_control_cititruck_node" name="fork_control" output="screen">
-	      <param name="visualize" value="true" />
-	      <param name="fork_max_moving_time" value="2" />
-    </node>
-</launch>
