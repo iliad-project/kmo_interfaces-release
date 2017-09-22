@@ -2,6 +2,12 @@
 Changelog for package kmo_navserver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.2 (2017-09-22)
+------------------
+* added nav_msgs
+* added nav_msgs
+* Contributors: Marc Hanheide
+
 0.0.1 (2017-09-22)
 ------------------
 * Added empty map launch file.
