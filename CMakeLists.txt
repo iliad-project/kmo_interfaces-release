@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp 
   rosconsole 
   rosbag 
+  nav_msgs
   tf 
   tf_conversions
 )
