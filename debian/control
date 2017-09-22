@@ -1,0 +1,12 @@
+Source: ros-kinetic-kmo-navserver
+Section: misc
+Priority: extra
+Maintainer: Henrik Andreasson <henrik.andreasson@oru.se>
+Build-Depends: debhelper (>= 9.0.0), libboost-all-dev, libeigen3-dev, ros-kinetic-catkin, ros-kinetic-cmake-modules, ros-kinetic-message-generation, ros-kinetic-nav-msgs, ros-kinetic-rosbag, ros-kinetic-rosconsole, ros-kinetic-roscpp, ros-kinetic-std-msgs, ros-kinetic-tf, ros-kinetic-tf-conversions
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-kinetic-kmo-navserver
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libboost-all-dev, libeigen3-dev, ros-kinetic-nav-msgs, ros-kinetic-rosbag, ros-kinetic-rosconsole, ros-kinetic-roscpp, ros-kinetic-std-msgs, ros-kinetic-tf, ros-kinetic-tf-conversions
+Description: A ROS driver for the VMC500/CVC600 unit.
