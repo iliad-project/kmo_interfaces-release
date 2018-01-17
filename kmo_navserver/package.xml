@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>kmo_navserver</name>
-  <version>0.0.3</version>
+  <version>0.0.4</version>
   <description>
     A ROS driver for the VMC500/CVC600 unit.
   </description>

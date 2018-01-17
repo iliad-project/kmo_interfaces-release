@@ -21,6 +21,15 @@ The source code of this driver (linuxcan.tar.gz) is available in the external_li
 
 `$ sudo make install`
 
+To check that the driver is properly installed plug in the Kvaser CAN USB adapter and run
+
+`dmesg | grep leaf`
+
+if you get something like
+
+`[19.4232] usbcore: registered new interface driver leaf`
+
+then you are all god to go. A note is that this driver might be needed to be re-built in case you update your kernel. If you do have troubles accessing the CAN dongle after a kernel update, wipe the whole source tree and start all over again, that should sort it out.
 
 #### Install the ROS packages
 
@@ -30,7 +39,15 @@ Place the sources in your catkin workspace and run
 
 #### Running the real truck
 
-Note that this assumes that the truck is located in the basement @ ORU.
+In order to run the real truck you need to change one build parameter in the orunav_mpc/CMakeLists.txt file, change the parameter SW_BUILD_SIMULATION to OFF.
+
+`SET(SW_BUILD_SIMULATION OFF CACHE BOOL          "Build controller to run within simulation." FORCE)`
+
+
+The following example assumes that the truck is located in the basement @ ORU.
 
 `$ roslaunch kmo_navserver real_single_truck.launch`
 
+Another option is to instead start an empty map.
+
+`$ roslaunch kmo_navserver real_single_truck_empty_map.launch`
