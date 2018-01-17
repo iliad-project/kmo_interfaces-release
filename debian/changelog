@@ -1,0 +1,43 @@
+ros-kinetic-kmo-navserver (0.0.4-0xenial) xenial; urgency=high
+
+  * Added tf_prefix workaround.
+  * tf_prefix fix.
+  * Merged conflicts.
+  * Added onboard launch files.
+  * Launchfile for onbard computer.
+  * Contributors: Henrik Andreasson
+
+ -- Henrik Andreasson <henrik.andreasson@oru.se>  Wed, 17 Jan 2018 00:00:00 -0000
+
+ros-kinetic-kmo-navserver (0.0.3-0xenial) xenial; urgency=high
+
+  * added visualization depenency
+  * Contributors: Marc Hanheide
+
+ -- Henrik Andreasson <henrik.andreasson@oru.se>  Thu, 21 Sep 2017 23:00:00 -0000
+
+ros-kinetic-kmo-navserver (0.0.2-0xenial) xenial; urgency=high
+
+  * added nav_msgs
+  * added nav_msgs
+  * Contributors: Marc Hanheide
+
+ -- Henrik Andreasson <henrik.andreasson@oru.se>  Thu, 21 Sep 2017 23:00:00 -0000
+
+ros-kinetic-kmo-navserver (0.0.1-0xenial) xenial; urgency=high
+
+  * Added empty map launch file.
+  * Merge branch 'master' of gitsvn-nt.oru.se:software/kmo_interfaces
+  * Fixed install problem with linuxcan, added real cititruck launch file.
+  * Added sick param to launch file
+  * Fixed steering wheel offset bug.
+  * Moved / removed files.
+  * Merge branch 'master' of gitsvn-nt.oru.se:software/kmo_interfaces
+  * Added flag to skip state2, not used in protocol 8.
+  * Updated default protocol 2 -> 8.
+  * Initial version.
+  * Contributors: Federico Pecora, Henrik Andreasson
+
+ -- Henrik Andreasson <henrik.andreasson@oru.se>  Thu, 21 Sep 2017 23:00:00 -0000
+
+
