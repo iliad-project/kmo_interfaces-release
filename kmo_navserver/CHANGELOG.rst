@@ -2,6 +2,15 @@
 Changelog for package kmo_navserver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.4 (2018-01-17)
+------------------
+* Added tf_prefix workaround.
+* tf_prefix fix.
+* Merged conflicts.
+* Added onboard launch files.
+* Launchfile for onbard computer.
+* Contributors: Henrik Andreasson
+
 0.0.3 (2017-09-22)
 ------------------
 * added visualization depenency
