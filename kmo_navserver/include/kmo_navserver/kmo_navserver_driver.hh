@@ -109,8 +109,8 @@ private:
      bool initOdom_;
 
      std::string socket_file_;
-     std::string tf_prefix_own_;
-
+     std::string tf_prefix_;
+     
 public:
      geometry_msgs::Twist cmdvel_;
 

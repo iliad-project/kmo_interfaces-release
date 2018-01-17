@@ -84,9 +84,12 @@ VMCNavserverDriver::VMCNavserverDriver (ros::NodeHandle comm_nh, ros::NodeHandle
   param_nh.param<int>("robot_type", params_.robotType, static_cast<int>(SNOWWHITE));
   param_nh.param<double>("steering_fix_wheel_distance", params_.steeringFixWheelDistance, 0.68); // Snowwhite...
   param_nh.param<double>("steering_fix_wheel_distance_y", params_.steeringFixWheelDistanceY, 0.); // Snowwhite...
-  param_nh.param<std::string>("tf_prefix_own", tf_prefix_own_, std::string(""));
+  param_nh.param<std::string>("tf_prefix", tf_prefix_, std::string(""));
+  std::string tf_prefix_own;
+  param_nh.param<std::string>("tf_prefix_own", tf_prefix_own, std::string(""));
+  tf_prefix_ += tf_prefix_own;
   param_nh.param<std::string>("tf_frame_state_id", tf_frame_state_id_, std::string("state_base_link"));
-  param_nh.param<std::string>("tf_frame_state_id", tf_frame_state_id_, std::string("state2_base_link"));
+  param_nh.param<std::string>("tf_frame_state_id", tf_frame_state2_id_, std::string("state2_base_link"));
   param_nh.param<bool>("epu", params_.navParams.epu, false);
   param_nh.param<bool>("use_epu_time_offset", params_.useEPUtimeOffset, true);
   param_nh.param<double>("additional_epu_offset", params_.additionalEPUoffset, 0.);
@@ -256,8 +259,10 @@ VMCNavserverDriver::processData(const std::string &mesg)
 		 // Don't send the transform here, add a static transform publisher to the launch files...
 		 sensor_msgs::LaserScan scan;
 		 sm.getRosScan(scan);
-
 		 scan.header.stamp = stamp_time;
+		 // Add the tf_prefix to be able to separate the frames
+		 std::string frame_id = tf_prefix_ + scan.header.frame_id;
+		 scan.header.frame_id = frame_id;
 		 if (sm.sensor_id == 0) {
 		   pub_sick_id0_.publish(scan);
 		 }
@@ -305,7 +310,7 @@ VMCNavserverDriver::processData(const std::string &mesg)
 		   geometry_msgs::TransformStamped stf = state.getTF();
 		   stf.header.frame_id = frame_id_;
 		   stf.header.stamp = stamp_time;
-		   stf.child_frame_id = tf_prefix_own_ + tf_frame_state2_id_;
+		   stf.child_frame_id = tf_prefix_ + tf_frame_state2_id_;
 		   
 		   //send the transform
 		   state_broadcaster.sendTransform(stf);
@@ -346,7 +351,7 @@ VMCNavserverDriver::processData(const std::string &mesg)
 		    geometry_msgs::TransformStamped stf = state.getTF();
 		    stf.header.frame_id = frame_id_;
 		    stf.header.stamp = stamp_time;
-		    stf.child_frame_id = tf_prefix_own_ + tf_frame_state_id_;
+		    stf.child_frame_id = tf_prefix_ + tf_frame_state_id_;
 		    //send the transform
 		    state_broadcaster.sendTransform(stf);
 		    
@@ -567,7 +572,7 @@ VMCNavserverDriver::processData(const std::string &mesg)
 			 geometry_msgs::TransformStamped odom_trans;
 			 odom_trans.header.stamp = stamp_time;
 			 odom_trans.header.frame_id = frame_id_;
-			 odom_trans.child_frame_id = tf_prefix_own_ + std::string("odom_base_link");
+			 odom_trans.child_frame_id = tf_prefix_ + std::string("odom_base_link");
 		    
 			 odom_trans.transform.translation.x = odomState_.x;
 			 odom_trans.transform.translation.y = odomState_.y;
