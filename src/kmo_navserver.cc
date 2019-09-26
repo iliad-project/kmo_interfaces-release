@@ -88,6 +88,7 @@ VMCNavserver::startSubscription()
 {
      assert(_ethSock.isConnected());
      send("basetime");
+
      std::string protocol_str = "protocol " + toString(_params.protocol_ver);
      send(protocol_str);
      if (_params.enc)
