@@ -50,7 +50,7 @@ main (int argc, char **argv)
   // Init ROS
   ros::init (argc, argv, "kmo_navserver_node"); 
 
-  ros::NodeHandle comm_nh ("kmo_navserver"); // for topics, services
+  ros::NodeHandle comm_nh ("control"); // for topics, services
   ros::NodeHandle param_nh ("~");     // for parameters
 
   po::options_description desc("Allowed options");
