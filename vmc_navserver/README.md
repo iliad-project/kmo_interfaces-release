@@ -1,0 +1,1 @@
+This is only used to be able to use rostopic echo on the terminal on older bag files, for example Arla, COOP etc. - Anything else? The messages defined here should be exactly the same as in kmo_navserver.

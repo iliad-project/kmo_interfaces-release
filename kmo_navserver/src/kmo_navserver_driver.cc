@@ -59,7 +59,7 @@ inline double median_sample(std::vector<double>& samples)
 
 /** \brief Constructor */
 VMCNavserverDriver::VMCNavserverDriver (ros::NodeHandle comm_nh, ros::NodeHandle param_nh, const VMCNavserverDriver::Params& params)
-  : params_(params), baseTime_(-1.), lastTimeStampEnc_(-1.), lastTimeStampState_(-1.), lastTimeStampState2_(-1.), lastTimeStampSick_(-1.), timeOffsetSize_(100), timeOffsetsCounter_(0), initOdom_(true)
+  : params_(params), baseTime_(-1.), lastTimeStampEnc_(-1.), lastTimeStampState_(-1.), lastTimeStampState2_(-1.), lastTimeStampSick_(-1.), timeOffsetSize_(100), timeOffsetsCounter_(0), initOdom_(true), lastTimeStampLoc_(-1.)
        //reconfigure_server_(param_nh), 
     
 {
@@ -67,7 +67,12 @@ VMCNavserverDriver::VMCNavserverDriver (ros::NodeHandle comm_nh, ros::NodeHandle
 //  ReconfigureServer::CallbackType f = boost::bind(&uEyeDriver::configCb, this, _1, _2);
 //  reconfigure_server_.setCallback(f);
 
-  param_nh.param<std::string>("kmo_navserver_frame", frame_id_, std::string ("/world"));
+  param_nh.param<std::string>("odom_frame_id", odom_frame_id_, std::string ("odom"));
+  param_nh.param<std::string>("global_frame_id", global_frame_id_, std::string ("map"));
+  param_nh.param<std::string>("base_footprint_frame_id", base_footprint_frame_id_, std::string("base_footprint"));
+  param_nh.param<std::string>("state_frame_id", state_frame_id_, std::string("base_link_ground_truth"));
+  param_nh.param<std::string>("laserscan0_frame_id", laserscan0_frame_id_, "laserscan0_frame");
+  param_nh.param<std::string>("laserscan1_frame_id", laserscan1_frame_id_, "laserscan1_frame");
   
   param_nh.param<std::string>("host", params_.navParams.host, std::string("192.168.0.100"));
   param_nh.param<int>("port", params_.navParams.port, 5432);
@@ -79,6 +84,7 @@ VMCNavserverDriver::VMCNavserverDriver (ros::NodeHandle comm_nh, ros::NodeHandle
   param_nh.param<std::string>("sent_logname", params_.navParams.sent_logname, std::string(""));
   param_nh.param<bool>("set_state_as_init_odom", params_.setStateAsInitOdom, true);
   param_nh.param<int>("debug", params_.debug, 0);
+  param_nh.param<int>("protocol_ver", params_.navParams.protocol_ver, 8);
   param_nh.param<bool>("combined_steer_and_drive", params_.combinedSteerAndDrive, true);
   param_nh.param<bool>("use_vmc_timestamp", params_.useVmcTimestamp, true);
   param_nh.param<int>("robot_type", params_.robotType, static_cast<int>(SNOWWHITE));
@@ -88,14 +94,20 @@ VMCNavserverDriver::VMCNavserverDriver (ros::NodeHandle comm_nh, ros::NodeHandle
   std::string tf_prefix_own;
   param_nh.param<std::string>("tf_prefix_own", tf_prefix_own, std::string(""));
   tf_prefix_ += tf_prefix_own;
-  param_nh.param<std::string>("tf_frame_state_id", tf_frame_state_id_, std::string("state_base_link"));
   param_nh.param<std::string>("tf_frame_state_id", tf_frame_state2_id_, std::string("state2_base_link"));
   param_nh.param<bool>("epu", params_.navParams.epu, false);
   param_nh.param<bool>("use_epu_time_offset", params_.useEPUtimeOffset, true);
   param_nh.param<double>("additional_epu_offset", params_.additionalEPUoffset, 0.);
   param_nh.param<std::string>("socket_file", socket_file_, std::string(""));
+  param_nh.param<double>("min_time_loc_delta", params_.minTimeLocDelta, 0.06);
 
-     if (params_.navParams.epu)
+  // Get the parameters for the topic names.
+  param_nh.param<std::string>("laserscan0_topic_name", laserscan0_topic_name_, "laserscan0");
+  param_nh.param<std::string>("laserscan1_topic_name", laserscan1_topic_name_, "laserscan1");
+
+  param_nh.param<std::string>("mcl_pose_topic", mcl_pose_topic_, "mcl_pose_estimate");
+
+  if (params_.navParams.epu)
        params_.navParams.protocol2Hack = true;
 
      std::ostringstream os;
@@ -111,10 +123,11 @@ VMCNavserverDriver::VMCNavserverDriver (ros::NodeHandle comm_nh, ros::NodeHandle
      }
      pub_enc_ = comm_nh.advertise<kmo_navserver::VMCEncodersStamped>("encoders", 50);
      pub_laserway_ = comm_nh.advertise<kmo_navserver::VMCLaserWayStamped>("laserway", 50);
-     pub_sick_id0_ = comm_nh.advertise<sensor_msgs::LaserScan>("laserscan0",10);
-     pub_sick_id1_ = comm_nh.advertise<sensor_msgs::LaserScan>("laserscan1",10);
+     pub_sick_id0_ = comm_nh.advertise<sensor_msgs::LaserScan>(laserscan0_topic_name_,10);
+     pub_sick_id1_ = comm_nh.advertise<sensor_msgs::LaserScan>(laserscan1_topic_name_,10);
 
-     sub_loc_ = param_nh.subscribe<nav_msgs::Odometry>("input_loc",10,&VMCNavserverDriver::process_loc,this);
+     //sub_loc_ = param_nh.subscribe<nav_msgs::Odometry>("input_loc",10,&VMCNavserverDriver::process_loc,this);
+     sub_loc_ = param_nh.subscribe<nav_msgs::Odometry>(mcl_pose_topic_, 10, &VMCNavserverDriver::process_loc, this);
 
      odomState_.setZero();
      oldState_.setZero();
@@ -230,7 +243,9 @@ VMCNavserverDriver::processData(const std::string &mesg)
 		    basetime_usec = atof(tok);
 		    
 		    baseTime_ = basetime_sec + basetime_usec * 0.000001;
-	       }
+        std::cout << "got basetime : " << baseTime_ << std::endl;
+
+         }
 	       // -------------------------------------------
 	       // ------------------ sick -------------------
 	       // -------------------------------------------
@@ -260,17 +275,16 @@ VMCNavserverDriver::processData(const std::string &mesg)
 		 sensor_msgs::LaserScan scan;
 		 sm.getRosScan(scan);
 		 scan.header.stamp = stamp_time;
-		 // Add the tf_prefix to be able to separate the frames
-		 std::string frame_id = tf_prefix_ + scan.header.frame_id;
-		 scan.header.frame_id = frame_id;
 		 if (sm.sensor_id == 0) {
+		   scan.header.frame_id = laserscan0_frame_id_; 
 		   pub_sick_id0_.publish(scan);
 		 }
 		 else if (sm.sensor_id == 1) {
+		   scan.header.frame_id = laserscan1_frame_id_; 
 		   pub_sick_id1_.publish(scan);
 		 }
 		 else {
-		   ROS_ERROR_STREAM("[kmo_navserver]: sensor id is > 1 (" << sm.sensor_id << ")");
+		   ROS_WARN_STREAM_THROTTLE(30, "[kmo_navserver]: sensor id is > 1 (" << sm.sensor_id << ")");
 		 }
 	       }
                
@@ -304,13 +318,13 @@ VMCNavserverDriver::processData(const std::string &mesg)
 		       stamp_time = ros::Time(timestamp + median_sample(timeOffsets_));
 		     }
 		   nav_msgs::Odometry ros_state = state.getRosOdometry();
-		   ros_state.header.frame_id = frame_id_;
+		   ros_state.header.frame_id = global_frame_id_;
 		   ros_state.header.stamp = stamp_time;
 		   
 		   geometry_msgs::TransformStamped stf = state.getTF();
-		   stf.header.frame_id = frame_id_;
+		   stf.header.frame_id = global_frame_id_;
 		   stf.header.stamp = stamp_time;
-		   stf.child_frame_id = tf_prefix_ + tf_frame_state2_id_;
+		   stf.child_frame_id = tf_frame_state2_id_;
 		   
 		   //send the transform
 		   state_broadcaster.sendTransform(stf);
@@ -349,9 +363,10 @@ VMCNavserverDriver::processData(const std::string &mesg)
 		    }
 
 		    geometry_msgs::TransformStamped stf = state.getTF();
-		    stf.header.frame_id = frame_id_;
+		    stf.header.frame_id = global_frame_id_;
 		    stf.header.stamp = stamp_time;
-		    stf.child_frame_id = tf_prefix_ + tf_frame_state_id_;
+		    stf.child_frame_id = state_frame_id_;
+
 		    //send the transform
 		    state_broadcaster.sendTransform(stf);
 		    
@@ -363,7 +378,8 @@ VMCNavserverDriver::processData(const std::string &mesg)
 		    }
 		    
 		    nav_msgs::Odometry ros_state = state.getRosOdometry();
-		    ros_state.header.frame_id = frame_id_;
+		    ros_state.header.frame_id = global_frame_id_;
+		    ros_state.child_frame_id = state_frame_id_;
 		    ros_state.header.stamp = stamp_time;
 		    //set the velocity
 		    ros_state.twist.twist.linear.x = (state.x - oldState_.x)/time_diff;
@@ -425,7 +441,7 @@ VMCNavserverDriver::processData(const std::string &mesg)
 		    
 		    // Fill in the data.
 		    kmo_navserver::VMCLaserWayStamped vmc_laserway;
-		    vmc_laserway.header.frame_id = frame_id_;
+		    //vmc_laserway.header.frame_id = frame_id_;
 		    vmc_laserway.header.stamp = stamp_time;
 		    vmc_laserway.data.bearing = bearing;
 		    vmc_laserway.data.distance = distance;
@@ -517,7 +533,7 @@ VMCNavserverDriver::processData(const std::string &mesg)
 		    };
 		    
 		    kmo_navserver::VMCEncodersStamped vmc_encoders;
-		    vmc_encoders.header.frame_id = frame_id_;
+		    //vmc_encoders.header.frame_id = frame_id_;
 		    vmc_encoders.header.stamp = stamp_time;
 		    vmc_encoders.encoders.resize(encoders.size());
 		    for(unsigned int i=0;i<encoders.size();i++){
@@ -571,8 +587,8 @@ VMCNavserverDriver::processData(const std::string &mesg)
 			 geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(odomState_.a);
 			 geometry_msgs::TransformStamped odom_trans;
 			 odom_trans.header.stamp = stamp_time;
-			 odom_trans.header.frame_id = frame_id_;
-			 odom_trans.child_frame_id = tf_prefix_ + std::string("odom_base_link");
+			 odom_trans.header.frame_id = odom_frame_id_;
+			 odom_trans.child_frame_id = base_footprint_frame_id_;
 		    
 			 odom_trans.transform.translation.x = odomState_.x;
 			 odom_trans.transform.translation.y = odomState_.y;
@@ -585,7 +601,7 @@ VMCNavserverDriver::processData(const std::string &mesg)
 			 //next, we'll publish the odometry message over ROS
 			 nav_msgs::Odometry odom;
 			 odom.header.stamp = stamp_time;
-			 odom.header.frame_id = frame_id_;
+			 odom.header.frame_id = odom_frame_id_;
 		    
 			 //set the position
 			 odom.pose.pose.position.x = odomState_.x;
@@ -595,7 +611,7 @@ VMCNavserverDriver::processData(const std::string &mesg)
 		    
 			 
 			 //set the velocity
-			 odom.child_frame_id = "odom_base_link";
+			 odom.child_frame_id = base_footprint_frame_id_;
 			 odom.twist.twist.linear.x = dx / time_diff;
 			 odom.twist.twist.linear.y = dy / time_diff;
 			 odom.twist.twist.angular.z = da / time_diff;
@@ -654,8 +670,8 @@ VMCNavserverDriver::spin(ros::NodeHandle &node)
             }
             else
             {
-                ROS_ERROR("nothing to process...");
-                usleep(10000);
+//                ROS_ERROR("nothing to process...");
+                usleep(100);
             }
         }
         // Shutdown...
@@ -668,7 +684,19 @@ VMCNavserverDriver::process_loc(const nav_msgs::OdometryConstPtr &msg)
 {
   if (!params_.navParams.epu)
     return;
+
+  double current_stamp = msg->header.stamp.toSec();
+  if (this->lastTimeStampLoc_ < 0) {
+    this->lastTimeStampLoc_ = current_stamp;
+    return;
+  }
 		
+  if (current_stamp - this->lastTimeStampLoc_ < this->params_.minTimeLocDelta) {
+    return;
+  }
+
+  this->lastTimeStampLoc_ = current_stamp;
+
 	double off=median_sample(timeOffsets_);
   	ros::Time stamp=msg->header.stamp;
 
@@ -707,21 +735,24 @@ VMCNavserverDriver::process_loc(const nav_msgs::OdometryConstPtr &msg)
   if (params_.navParams.protocol2Hack)
     timestamp = timestamp - baseTime_;
 	 
-  //std::cout << "timestamp : " << timestamp << std::endl;
-  //std::cout << "baseTime  : " << baseTime << std::endl;
-	 
+  if (params_.debug == 2) {
+    std::cout << "timestamp : " << timestamp << std::endl;
+    std::cout << "baseTime  : " << baseTime_ << std::endl;
+  }
+
   std::string cmd = "epu " + _toString_(timestamp) + " " + _toString_(conf) + " " + _toString_(pos_x) + " " + _toString_(pos_y) + " " + _toString_(pos_th) + " " + _toString_(cxx) + " " + _toString_(cyy) + " " + _toString_(cpp) + " " + _toString_(rxy) + " " + _toString_(rxp) + " " + _toString_(ryp);
 	 
-//	 if (useProtocol2)
-//	      cmd = "protocol 0\n" + cmd + "\nprotocol 2";
-//	 if (debug == 2)
-//  std::cout << "cmd : " << cmd << std::endl;
+  if (params_.debug == 2)
+    std::cout << "cmd : " << cmd << std::endl;
 
+  // It seems that the epu interface is only available in protocol 0.
   if (params_.navParams.protocol2Hack)
     navserver_.send("protocol 0");
   
   navserver_.send(cmd);
   
-  if (params_.navParams.protocol2Hack)
-    navserver_.send("protocol 2");
+  if (params_.navParams.protocol2Hack) {
+    std::string protocol_cmd = "protocol " + _toString_(params_.navParams.protocol_ver);
+    navserver_.send(protocol_cmd);
+  }
 }
