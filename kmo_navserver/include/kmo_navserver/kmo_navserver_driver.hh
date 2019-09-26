@@ -38,6 +38,7 @@ public:
 	       useEPUtimeOffset = true;
 	       additionalEPUoffset = 0.;
 	       ignoreState2 = true;
+         minTimeLocDelta = 0.06;
 	  }
 
 	  VMCNavserver::Params navParams;
@@ -49,9 +50,10 @@ public:
 	  double steeringFixWheelDistance; //X
 	  double steeringFixWheelDistanceY;
 	  int robotType;
-          bool useEPUtimeOffset;
-          double additionalEPUoffset;
-          bool ignoreState2;
+    bool useEPUtimeOffset;
+    double additionalEPUoffset;
+    bool ignoreState2;
+    double minTimeLocDelta;
 
 	  friend std::ostream& operator<<(std::ostream &os, const VMCNavserverDriver::Params &obj)
 	  {
@@ -65,7 +67,8 @@ public:
 	       os << "\nuseEPUtimeOffset         : " << obj.useEPUtimeOffset;
 	       os << "\nadditionalEPUoffset      : " << obj.additionalEPUoffset;
 	       os << "\nignoreState2             : " << obj.ignoreState2;
-	       return os;
+         os << "\nminTimeLocDelta          : " << obj.minTimeLocDelta;
+         return os;
 	  }
 
 	  
@@ -84,20 +87,30 @@ private:
 
      ros::NodeHandle n;
      tf::TransformBroadcaster odom_broadcaster, state_broadcaster;
-  ros::Publisher pub_odom_, pub_state_, pub_state2_, pub_enc_, pub_laserway_, pub_sick_id0_, pub_sick_id1_;
+     ros::Publisher pub_odom_, pub_state_, pub_state2_, pub_enc_, pub_laserway_, pub_sick_id0_, pub_sick_id1_;
      ros::Subscriber sub_loc_;
 
-     std::string frame_id_;
-     std::string tf_frame_state_id_;
+     std::string global_frame_id_;
+     std::string odom_frame_id_;
+     std::string state_frame_id_;
+     std::string base_footprint_frame_id_;
      std::string tf_frame_state2_id_;
+     std::string laserscan0_frame_id_;
+     std::string laserscan1_frame_id_;
+
+     std::string laserscan0_topic_name_;
+     std::string laserscan1_topic_name_;
+     std::string mcl_pose_topic_;
+
      VMCNavserver navserver_;
      VMCNavserverDriver::Params params_;
-     
+
      double baseTime_;
      double lastTimeStampEnc_;
      double lastTimeStampState_;
      double lastTimeStampState2_;
      double lastTimeStampSick_;
+     double lastTimeStampLoc_;
 
      size_t timeOffsetSize_;
      std::vector<double> timeOffsets_;

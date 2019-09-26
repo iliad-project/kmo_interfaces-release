@@ -45,6 +45,11 @@ add_executable(fork_control_cititruck_node src/fork_control_cititruck_main.cpp)
 add_dependencies(fork_control_cititruck_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(fork_control_cititruck_node ${catkin_LIBRARIES})
 
+
+add_executable(fork_control_bt_node src/bt-forksensors_node.cpp)
+add_dependencies(fork_control_bt_node ${catkin_EXPORTED_TARGETS})
+target_link_libraries(fork_control_bt_node ${catkin_LIBRARIES})
+
 #############
 ## Install ##
 #############

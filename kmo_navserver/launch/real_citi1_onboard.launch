@@ -4,7 +4,8 @@
   <!-- ALL ROBOT SPECIFIC TASKS -->
 
   <group ns="robot1">
-  <param name="tf_prefix" value="robot1" />
+    <param name="tf_prefix" value="robot1" />
+    <arg name="tf_prefix" value="robot1" />
 
   <node pkg="kmo_navserver" type="kmo_navserver_node" name="kmo_navserver" output="screen">
      <param name="host" value="192.168.100.100" />
@@ -14,7 +15,10 @@
      <param name="sick" value="true" />
      <param name="steering_fix_wheel_distance" value="1.190" />
      <param name="steering_fix_wheel_distance_y" value="0.0" />
-     <param name="tf_frame_state_id" value="base_link" />
+     <param name="odom_frame_id" value="$(arg tf_prefix)/odom" />
+     <param name="base_footprint_frame_id" value="$(arg tf_prefix)/base_footprint" />
+     <param name="state_frame_id" value="$(arg tf_prefix)/base_footprint_ground_truth" />
+
      
      <param name="tf_x" value="1.5" />
      <param name="tf_y" value="0.0" />
@@ -27,10 +31,20 @@
      <param name="fork_max_moving_time" value="2.5" />
      <param name="fork_moving_time_support_to_low" value="0.3" />
      <param name="delay_support_to_low" value="0.2" />
+     <remap from="/$(arg tf_prefix)/control/fork_report" to="/$(arg tf_prefix)/control/fork/report"/>
   </node>
 
   <node pkg="orunav_mpc" type="controller_node" name="controller" output="screen">
-        <param name="robot_id" value="1" />
+    <param name="robot_id" value="1" />
+    <remap from="/$(arg tf_prefix)/cmd_vel"
+	   to="/$(arg tf_prefix)/controller/cmd_vel" />
+    <remap from="controller/commands"
+	   to="control/controller/commands" />
+    <remap from="controller/reports"
+	   to="control/controller/reports" />
+    <remap from="controller/trajectories"
+	   to="control/controller/trajectories" />
+
   </node>
 
   <node pkg="orunav_motion_planner" type="get_path_service" name="get_path_service" output="screen">		
@@ -80,9 +94,17 @@
     <param name="max_acc" value="0.1" />
 
     <param name="use_safetyregions" value="true"/>
-    <param name="safety_laser_topic" value="/robot1/kmo_navserver/laserscan0"/>
+    <param name="safety_laser_topic" value="/$(arg tf_prefix)/kmo_navserver/laserscan0"/>
     <param name="slowdown_drivingslow_lookahead_time" value="20"/>
     <param name="max_slowdown_vel" value="0.1"/>
+    <param name="use_update_task_service" value="false"/>
+
+    <remap from="controller/reports" to="control/controller/reports" />
+    <remap from="controller/commands" to="control/controller/commands" />
+    <remap from="fork/report" to="control/fork/report" />
+    <remap from="fork/command" to="control/fork_command" />
+    <remap from="controller/trajectories" to="control/controller/trajectories" />
+
   </node>
 
   </group>

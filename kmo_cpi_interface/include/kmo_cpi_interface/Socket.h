@@ -49,6 +49,9 @@ class Socket
    bool isConnected(){return connected;};
    virtual void reconnect(){};
 
+   std::string getHost() const { return host; }
+   int getPort() const { return port; }
+
 protected: //private:
 
   int m_sock;
