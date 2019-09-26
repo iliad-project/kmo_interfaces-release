@@ -1,11 +1,26 @@
 <?xml version="1.0"?>
 <launch>
 
+  <rosparam command="load" file="$(find orunav_params)/config/global.cfg"/>
+  <rosparam command="load" file="$(find orunav_params)/config/citi1.cfg"/>
+
+  <include file="$(find gazebo_worlds_oru)/launch/empty_map_server.launch"/>
+
+  <node pkg="orunav_vehicle_execution" type="point_n_click_target_client" name="point_n_click_target_client_citi1" output="screen">
+    <param name="load_operation" value="false" />
+    <rosparam param="robot_ids">[1]</rosparam>
+    <param name="multiple_vehicles" value="true" />
+  </node>
+
+  <node pkg="orunav_coordinator_fake" type="coordinator_fake_node" name="coordinator_fake_node" output="screen">
+    <param name="multiple_vehicles" value="true" />
+    <param name="use_ct" value="false" />  
+  </node>
+
   <!-- ALL ROBOT SPECIFIC TASKS -->
 
-  <group ns="robot2">
-    <param name="tf_prefix" value="robot2" />
-    <arg name="tf_prefix" value="robot2" />
+  <group ns="robot1">
+  <param name="tf_prefix" value="robot1" />
 
   <node pkg="kmo_navserver" type="kmo_navserver_node" name="kmo_navserver" output="screen">
      <param name="host" value="192.168.100.100" />
@@ -15,17 +30,16 @@
      <param name="sick" value="true" />
      <param name="steering_fix_wheel_distance" value="1.190" />
      <param name="steering_fix_wheel_distance_y" value="0.0" />
-     <param name="odom_frame_id" value="$(arg tf_prefix)/odom" />
-     <param name="base_footprint_frame_id" value="$(arg tf_prefix)/base_footprint" />
-     <param name="state_frame_id" value="$(arg tf_prefix)/base_footprint_ground_truth" />
-     
+     <param name="tf_frame_state_id" value="base_link" />
      
      <param name="tf_x" value="1.5" />
      <param name="tf_y" value="0.0" />
      <param name="tf_z" value="0.05" />
      <remap from="vmc_navserver/laserscan" to="laserscan"/>
-
-     <param name="use_vmc_timestamp" value="false"/>
+     <param name="epu" value="true" />
+     <param name="debug" value="0" />
+     <param name="use_epu_time_offset" value="true" />
+     <param name="min_time_loc_delta" value="0.1" />
   </node>
 
   <node pkg="kmo_fork_control" type="fork_control_cititruck_node" name="fork_control" output="screen">
@@ -33,19 +47,10 @@
      <param name="fork_max_moving_time" value="2.5" />
      <param name="fork_moving_time_support_to_low" value="0.3" />
      <param name="delay_support_to_low" value="0.2" />
-     <remap from="/$(arg tf_prefix)/control/fork_report" to="/$(arg tf_prefix)/control/fork/report"/>
   </node>
 
   <node pkg="orunav_mpc" type="controller_node" name="controller" output="screen">
-    <param name="robot_id" value="2" />
-    <remap from="/$(arg tf_prefix)/cmd_vel"
-	   to="/$(arg tf_prefix)/controller/cmd_vel" />
-    <remap from="controller/commands"
-	   to="control/controller/commands" />
-    <remap from="controller/reports"
-	   to="control/controller/reports" />
-    <remap from="controller/trajectories"
-	   to="control/controller/trajectories" />
+        <param name="robot_id" value="1" />
   </node>
 
   <node pkg="orunav_motion_planner" type="get_path_service" name="get_path_service" output="screen">		
@@ -83,9 +88,7 @@
     <param name="reassign_min_distance" value="0.1" />
   </node>  
 
-  <node pkg="orunav_vehicle_execution" type="orunav_vehicle_execution_node" name="orunav_vehicle_execution_node_citi2" output="screen">
-    <param name="robot_id" value="2" />
-
+  <node pkg="orunav_vehicle_execution" type="orunav_vehicle_execution_node" name="orunav_vehicle_execution_node_citi1" output="screen">
     <param name="visualize" value="true" />
     <param name="max_tracking_error" value="-1." />
     <param name="use_forks" value="true" />
@@ -93,16 +96,40 @@
     <param name="max_vel" value="0.3" />
     <param name="max_rotational_vel" value="0.3" />
     <param name="max_acc" value="0.1" />
-    <param name="use_update_task_service" value="false" />
-
-    <remap from="controller/reports" to="control/controller/reports" />
-    <remap from="controller/commands" to="control/controller/commands" />
-    <remap from="fork/report" to="control/fork/report" />
-    <remap from="fork/command" to="control/fork_command" />
-    <remap from="controller/trajectories" to="control/controller/trajectories" />
-
   </node>
 
   </group>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find cititruck_description)/launch/cititruck.rviz"/>
+
+<remap from="/robot1/kmo_navserver/input_loc" to="/ndt_mcl_pose"/>
+
+<node name="ndt_mcl" pkg="ndt_localization" type="ndt_mcl_localization" output="screen">
+<!-- jff file with map -->
+<param name="map_file" value="$(find graph_map)/maps/d2018_05_15_time16_11_03_.JFF"  />
+<param name="sensor_pose_x" value="0.807" />
+<param name="sensor_pose_y" value="-0.003" />
+<param name="sensor_pose_z" value="1.5" />
+<param name="sensor_pose_t" value="3.14316344992" />
+<param name="initial_y" value="3.34" />
+<param name="initial_x" value="3.45" />
+<param name="initial_t" value="0.0" />
+<!-- resolution of jff map -->
+<param name="resolution" value="0.7" />
+<!-- show aprticles for debug purposes -->
+<param name="show_particles" value="true" />
+<!-- particle count for ndt-mcl -->
+<param name="particle_count" value="500" />
+<param name="show_pose" value="true"/>
+<param name="fraction" value="1.0"/>
+<param name="force_SIR" value="true" />
+<param name="input_topic_name" value="/robot1/kmo_navserver/laserscan1" />
+<param name="Laser" value="true" />
+<param name="odom_tf" value="world" />
+<param name="root_tf" value="world" />
+<param name="base_tf" value="odom_base_link" />
+</node>
+
+
 
 </launch>

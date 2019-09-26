@@ -27,6 +27,10 @@ target_link_libraries(move_forks_test kmo_cpi_interface -lboost_program_options)
 add_executable(get_estop_test src/get_estop_test.cpp)
 target_link_libraries(get_estop_test kmo_cpi_interface -lboost_program_options)
 
+add_executable(get_bt-forksensors_test src/get_bt-forksensors_test.cpp)
+target_link_libraries(get_bt-forksensors_test kmo_cpi_interface -lboost_program_options)
+
+
 #############
 ## Install ##
 #############

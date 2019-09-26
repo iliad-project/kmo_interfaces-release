@@ -205,8 +205,8 @@ struct VMCStateMessage{
 		geometry_msgs::Quaternion state_quat = tf::createQuaternionMsgFromYaw(a);
 		geometry_msgs::TransformStamped state_trans;
 		state_trans.header.stamp = ros::Time(ts);
-		state_trans.header.frame_id = "/world";
-		state_trans.child_frame_id = "/state_base_link";
+		state_trans.header.frame_id = "world";
+		state_trans.child_frame_id = "state_base_link";
 		
 		state_trans.transform.translation.x = x;
 		state_trans.transform.translation.y = y;
@@ -220,7 +220,7 @@ struct VMCStateMessage{
 		//next, we'll publish the odometry message over ROS
 		nav_msgs::Odometry state;
 		state.header.stamp = ros::Time(ts);
-    		state.header.frame_id = "/world";
+    		state.header.frame_id = "world";
 		
 		//set the position
 		state.pose.pose.position.x = x;
@@ -326,8 +326,8 @@ struct VMCEncoderMessage{
 		geometry_msgs::Quaternion state_quat = tf::createQuaternionMsgFromYaw(a);
 		geometry_msgs::TransformStamped state_trans;
 		state_trans.header.stamp = ros::Time(ts);
-		state_trans.header.frame_id = "/world";
-		state_trans.child_frame_id = "/odom_base_link";
+		state_trans.header.frame_id = "world";
+		state_trans.child_frame_id = "odom";
 		
 		state_trans.transform.translation.x = x;
 		state_trans.transform.translation.y = y;
@@ -341,7 +341,7 @@ struct VMCEncoderMessage{
 		//next, we'll publish the odometry message over ROS
 		nav_msgs::Odometry state;
 		state.header.stamp = ros::Time(ts);
-		state.header.frame_id = "/world";
+		state.header.frame_id = "world";
 		
 		//set the position
 		state.pose.pose.position.x = x;
@@ -352,7 +352,7 @@ struct VMCEncoderMessage{
 		
 		
 		//set the velocity
-		state.child_frame_id = "odom_base_link";
+		state.child_frame_id = "odom";
 		return state;
 	}	
 	

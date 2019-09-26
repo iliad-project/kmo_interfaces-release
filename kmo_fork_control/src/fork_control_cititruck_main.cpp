@@ -28,7 +28,7 @@ public:
 	ForkControlCitiTruckNode (ros::NodeHandle &paramHandle) {
 	  
 
-	    forkcommand_sub_ = nh_.subscribe<orunav_msgs::ForkCommand>("fork/command",10,&ForkControlCitiTruckNode::process_forkcommand,this);
+	    forkcommand_sub_ = nh_.subscribe<orunav_msgs::ForkCommand>("control/fork_command",10,&ForkControlCitiTruckNode::process_forkcommand,this);
             double hb_report;
             paramHandle.param("heartbeat",hb_report,0.1);
 	    paramHandle.param<bool>("visualize",visualize,true);
@@ -40,7 +40,7 @@ public:
             paramHandle.param<double>("fork_moving_time_support_to_low", fork_moving_time_support_to_low_, 0.2);
             paramHandle.param<double>("delay_support_to_low", delay_support_to_low_, 0.2);
             
-            forkreport_pub_ = nh_.advertise<orunav_msgs::ForkReport>("fork/report", 1000);            
+            forkreport_pub_ = nh_.advertise<orunav_msgs::ForkReport>("control/fork_report", 1000);            
   	    if (visualize)
 	    {
                 std::cout << "The output is visualized using visualization_markers (in rviz)." << std::endl;

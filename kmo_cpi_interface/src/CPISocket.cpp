@@ -7,6 +7,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <stdio.h>
+#include <string>
 
 using namespace std;
 
@@ -28,6 +29,13 @@ CPISocket::CPISocket ( std::string host, int port ) : debug_(false)
   this->port  = port;
   this->connected = true;
 }
+
+void
+CPISocket::setParams(std::string host, int port ) {
+  this->host = host;
+  this->port = port;
+}
+
 
 /////////////////////////////////////////////////////
 //
@@ -143,6 +151,10 @@ void CPISocket::receiveResponse(string &str)
       throw SocketException ( "Could not read from CPI socket." );
     }
     
+  if (debug_) {
+    std::cout << "receiveResponse : " << str << std::endl;
+  }
+
   size_t pos;
   pos = str.find("<CPI2><Response>");    // 
   str = str.substr (pos + strlen("<CPI2><Response>")); 
@@ -160,9 +172,9 @@ void CPISocket::receiveGetResponse(string &reqTagName, string &itemTag)
   string str;
   receiveResponse(str);
 	
-  // for debugging, we print what we have received
-  // cout << "CPI(Get): receiveResponse returned " << str << endl; 
-	
+  if (debug_) {
+     cout << "CPI(Get): receiveResponse returned " << str << endl;
+  }
   size_t pos;
   pos = str.find("<Get Tag=\"");
   str = str.substr (pos + strlen("<Get Tag=\"")); 
@@ -510,4 +522,62 @@ bool CPISocket::getStopFlag()
     status = (val.compare("1") == 0);
     
     return status;
+}
+
+bool CPISocket::getBTForkLeft()
+{
+  bool status = false;
+  string reqTagName = "getReq_ForkLeft";
+  string itemTag = "<Item Path=\"Status/SDIO_2_1/DigitalInput3\"/>";
+  string respTagName, respItemTag;
+
+  this->sendGetRequest(reqTagName, itemTag);
+  this->receiveGetResponse(respTagName, respItemTag);
+
+  string val = this->extractValueFromItemTagResponse(respItemTag);
+  status = (val.compare("1") == 0);
+  return status;
+}
+
+bool CPISocket::getBTForkCenter()
+{
+  bool status = false;
+  string reqTagName = "getReq_ForkCenter";
+  string itemTag = "<Item Path=\"Status/SDIO_2_1/DigitalInput4\"/>";
+  string respTagName, respItemTag;
+
+  this->sendGetRequest(reqTagName, itemTag);
+  this->receiveGetResponse(respTagName, respItemTag);
+
+  string val = this->extractValueFromItemTagResponse(respItemTag);
+  status = (val.compare("1") == 0);
+  return status;
+}
+
+bool CPISocket::getBTForkRight()
+{
+  bool status = false;
+  string reqTagName = "getReq_ForkRight";
+  string itemTag = "<Item Path=\"Status/SDIO_2_1/DigitalInput8\"/>";
+  string respTagName, respItemTag;
+
+  this->sendGetRequest(reqTagName, itemTag);
+  this->receiveGetResponse(respTagName, respItemTag);
+
+  string val = this->extractValueFromItemTagResponse(respItemTag);
+  status = (val.compare("1") == 0);
+  return status;
+}
+
+double CPISocket::getBTForkHeight()
+{
+  string reqTagName = "getReq_ForkHeight";
+  string itemTag = "<Item Path=\"Status/SDIO_2_2/AuxEnc1Position\"/>";
+  string respTagName, respItemTag;
+
+  this->sendGetRequest(reqTagName, itemTag);
+  this->receiveGetResponse(respTagName, respItemTag);
+
+  string val = this->extractValueFromItemTagResponse(respItemTag);
+  return ::atof(val.c_str())*0.001;
 }
