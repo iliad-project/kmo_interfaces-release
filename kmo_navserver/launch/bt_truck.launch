@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- ALL ROBOT SPECIFIC TASKS -->
+  <node pkg="kmo_navserver" type="kmo_navserver_node" name="kmo_navserver" output="screen">
+    <param name="tf_prefix" value="robot3"/>
+    <param name="laserscan1_topic_name" value="/robot3/sensors/laser2d_top/scan"/>
+    <param name="laserscan1_frame_id" value="laser2d_top_link"/>
+    
+    <param name="host" value="192.168.100.100" />
+    <param name="enc" value="true" />
+    <param name="state" value="true" />
+    <param name="laser" value="true" />
+    <param name="sick" value="true" />
+    <param name="steering_fix_wheel_distance" value="1.635" />
+    <param name="steering_fix_wheel_distance_y" value="0.01" />
+    <param name="tf_frame_state_id" value="base_link" />
+    
+    <param name="tf_x" value="1.853" />
+    <param name="tf_y" value="0.03" />
+    <param name="tf_z" value="0.05" />
+    <remap from="vmc_navserver/laserscan" to="laserscan"/>
+  </node>
+
+  <node pkg="kmo_fork_control" type="fork_control_bt_node" name="fork_control" output="screen">
+    <param name="visualize" value="true" />
+    <param name="fork_max_moving_time" value="2.5" />
+    <param name="fork_moving_time_support_to_low" value="0.3" />
+    <param name="delay_support_to_low" value="0.2" />
+  </node>
+
+</launch>

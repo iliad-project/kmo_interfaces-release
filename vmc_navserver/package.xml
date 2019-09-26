@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>vmc_navserver</name>
+  <version>0.1.0</version>
+  <description>
+    Old message types from the 'old' vmc_navserver package.
+  </description>
+
+   <maintainer email="henrik.andreasson@oru.se">Henrik Andreasson</maintainer>
+  <license>BSD</license>
+
+  <build_depend>cmake_modules</build_depend>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>message_generation</build_depend>
+  <build_depend>std_msgs</build_depend>
+
+  <export>
+  </export>
+</package>
