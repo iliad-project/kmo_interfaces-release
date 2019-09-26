@@ -1,3 +1,31 @@
+## kmo_interfaces (kinetic) - 0.1.0-1
+
+The packages in the `kmo_interfaces` repository were released into the `kinetic` distro by running `/usr/bin/bloom-release -y --no-web -t kinetic -r kinetic kmo_interfaces` on `Thu, 26 Sep 2019 18:46:22 -0000`
+
+These packages were released:
+- `kmo_cpi_interface`
+- `kmo_fork_control`
+- `kmo_navserver`
+- `sick_s3x`
+- `vmc_navserver`
+
+Version of package(s) in repository `kmo_interfaces`:
+
+- upstream repository: https://gitsvn-nt.oru.se/marc-hanheide/kmo_interfaces.git
+- release repository: https://github.com/iliad-project/kmo_interfaces-release.git
+- rosdistro version: `0.0.4-0`
+- old version: `0.0.4-0`
+- new version: `0.1.0-1`
+
+Versions of tools used:
+
+- bloom version: `0.8.0`
+- catkin_pkg version: `0.4.13`
+- rosdep version: `0.16.1`
+- rosdistro version: `0.7.4`
+- vcstools version: `0.1.42`
+
+
 ## kmo_interfaces (kinetic) - 0.0.4-0
 
 The packages in the `kmo_interfaces` repository were released into the `kinetic` distro by running `/usr/bin/bloom-release -t kinetic -r kinetic kmo_interfaces` on `Wed, 17 Jan 2018 12:52:21 -0000`
