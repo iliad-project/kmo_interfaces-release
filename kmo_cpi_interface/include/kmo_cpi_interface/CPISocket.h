@@ -71,10 +71,12 @@ class CPISocket : public Socket
 {
  public:
 
+  CPISocket () {};
   CPISocket ( std::string host, int port );
   virtual ~CPISocket(){};
   virtual void reconnect();
 
+  void setParams(std::string host, int port );
 
   void sendGetRequest(std::string &reqTag, std::string &itemTag) ;
   void sendSetRequest(std::string &reqTag, std::string &itemTag) ;
@@ -116,11 +118,16 @@ class CPISocket : public Socket
   bool getEStopFlag();
   bool getStopFlag();
 
+  bool getBTForkLeft();
+  bool getBTForkRight();
+  bool getBTForkCenter();
+  double getBTForkHeight();
+
   void setDebugFlag() { debug_ = true; }
- private:
+private:
   void setLiftForksFlag(bool flag);
   void setLowerForksFlag(bool flag);
-  
+
   bool debug_;
 };
 

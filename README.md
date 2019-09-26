@@ -17,6 +17,8 @@ The source code of this driver (linuxcan.tar.gz) is available in the external_li
 
 `$ cd linuxcan`
 
+Remember this needs kernel headers installed (see linuxcan's README). Also it may not work with some kernels (it didn't with 4.15.0-32).
+
 `$ make`
 
 `$ sudo make install`
@@ -30,6 +32,8 @@ if you get something like
 `[19.4232] usbcore: registered new interface driver leaf`
 
 then you are all god to go. A note is that this driver might be needed to be re-built in case you update your kernel. If you do have troubles accessing the CAN dongle after a kernel update, wipe the whole source tree and start all over again, that should sort it out.
+In case this doesn't work either, check if there is a new driver available at [here](https://www.kvaser.com/downloads-kvaser/).
+
 
 #### Install the ROS packages
 
